@@ -1,5 +1,8 @@
-﻿using System;
+﻿using Capstone.DAL;
+using Capstone.Models;
+using System;
 using System.Collections.Generic;
+using System.Diagnostics.Tracing;
 
 namespace CLI
 {
@@ -8,6 +11,10 @@ namespace CLI
     /// </summary>
     public class MainMenu : CLIMenu
     {
+        private ParkSqlDAO parkSqlDAO;
+        private CampgroundSqlDAO campgroundSqlDAO;
+        private SiteSqlDAO siteSqlDAO;
+        private ReservationSqlDAO reservationSqlDAO;
         // You may want to store some private variables here.  YOu may want those passed in 
         // in the constructor of this menu
 
@@ -15,17 +22,28 @@ namespace CLI
         /// Constructor adds items to the top-level menu. You will likely have parameters  passed in
         /// here...
         /// </summary>
-        public MainMenu(/* Add any needed parameters here */) : base("Main Menu")
+        public MainMenu(ParkSqlDAO parkSqlDAO, CampgroundSqlDAO campgroundSqlDAO, SiteSqlDAO siteSqlDAO, ReservationSqlDAO reservationSqlDAO
+            ) : base("Main Menu")
         {
-            // Set any private variables here.
+            this.parkSqlDAO = parkSqlDAO;
+            this.campgroundSqlDAO = campgroundSqlDAO;
+            this.siteSqlDAO = siteSqlDAO;
+            this.reservationSqlDAO = reservationSqlDAO;
         }
 
         protected override void SetMenuOptions()
         {
             // A Sample menu.  Build the dictionary here
-            this.menuOptions.Add("1", "Add 2 integers");
-            this.menuOptions.Add("2", "Ask the user for name");
-            this.menuOptions.Add("3", "Go to a sub-menu");
+            IList<Park> parks = parkSqlDAO.GetParks();
+            int menuOption = 1;
+            foreach (Park park in parks)
+            {
+                this.menuOptions.Add(menuOption.ToString(), park.Name);
+                menuOption++;
+            }
+            //this.menuOptions.Add("1", parkSqlDAO.GetParks);
+            //this.menuOptions.Add("2", "Ask the user for name");
+            //this.menuOptions.Add("3", "Go to a sub-menu");
             this.menuOptions.Add("Q", "Quit program");
         }
 
