@@ -9,6 +9,7 @@ namespace Capstone.DAL
     public class CampgroundSqlDAO
     {
         private string connectionString;
+        
         Dictionary<int, string> months = new Dictionary<int, string>
         {
             { 1, "January" },
@@ -36,8 +37,9 @@ namespace Capstone.DAL
                 using (SqlConnection conn = new SqlConnection(connectionString))
                 {
                     conn.Open();
-                    const string QUERY = "SELECT * FROM campground";
+                    const string QUERY = "SELECT * FROM campground WHERE park_id = @park_id";
                     SqlCommand cmd = new SqlCommand(QUERY, conn);
+                    cmd.Parameters.AddWithValue(@"park_id", park.Id);
                     SqlDataReader reader = cmd.ExecuteReader();
                     while (reader.Read())
                     {

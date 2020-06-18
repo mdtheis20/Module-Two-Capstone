@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Capstone.Models;
+using System;
 using System.Collections.Generic;
 
 namespace CLI
@@ -83,6 +84,14 @@ namespace CLI
         /// <summary>
         /// Override this to display messages, data or text prior to the menu listing
         /// </summary>
+        protected void PrintCampgrounds(IList<Campground> campgrounds)
+        {
+            Console.WriteLine("{0, -6}{1, -35}{2, -15}{3, -15}{4, 9}", " ", "Name", "Open", "Close", "Daily Fee");
+            foreach (Campground campground in campgrounds)
+            {
+                Console.WriteLine($"#{campground.Id,-5}{campground.Name,-35}{campground.OpeningMonth,-15}{campground.ClosingMonth,-15}{campground.DailyFee:C2}");
+            }
+}
         virtual protected void BeforeDisplayMenu()
         {
             SetColor(ConsoleColor.Yellow);

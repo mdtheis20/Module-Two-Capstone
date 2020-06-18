@@ -11,5 +11,9 @@ namespace Capstone.DAL
         {
             this.connectionString = connectionString;
         }
+        public bool GetAvailableSites(int chosenCampground, DateTime chosenArrival, DateTime chosenDeparture)
+        {
+
+        }
     }
 }

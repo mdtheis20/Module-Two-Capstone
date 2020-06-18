@@ -1,20 +1,19 @@
-﻿using System;
+﻿using CLI;
+using System;
 using System.Collections.Generic;
+using System.Text;
 
-namespace CLI
+namespace Capstone.Views
 {
-    /// <summary>
-    /// A sub-menu 
-    /// </summary>
-    public class SubMenu1 : CLIMenu
+    public class ReservationMenu : CLIMenu
     {
         // Store any private variables here....
 
         /// <summary>
         /// Constructor adds items to the top-level menu
         /// </summary>
-        public SubMenu1(/** Variables may be passed in... ***/) :
-            base("Sub-Menu 1")
+        public ReservationMenu(/** Variables may be passed in... ***/) :
+            base("Reservation Menu")
         {
             // Store any values passed in....
         }
@@ -65,7 +64,7 @@ namespace CLI
         private void PrintHeader()
         {
             SetColor(ConsoleColor.Magenta);
-            Console.WriteLine(Figgle.FiggleFonts.Standard.Render("Sub-Menu 1"));
+            Console.WriteLine(Figgle.FiggleFonts.Standard.Render("Reservation Menu"));
             ResetColor();
         }
 
