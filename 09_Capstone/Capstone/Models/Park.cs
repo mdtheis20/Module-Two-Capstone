@@ -15,9 +15,9 @@ namespace Capstone.Models
         public string Description { get; set; }
         public override string ToString()
         {
-            return @"{Name} National Park
+            return $@"{Name} National Park
 Location:           {Location}
-Established:        {Established}
+Established:        {EstablishDate}
 Area:               {Area:N0} sq km
 Annual Visitors:    {Visitors:N0}
 

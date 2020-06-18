@@ -9,8 +9,8 @@ namespace Capstone.Models
         public int Id { get; set; }
         public int ParkId { get; set; }
         public string Name { get; set; }
-        public DateTime OpeningMonth { get; set; }
-        public DateTime ClosingMonth { get; set; }
+        public string OpeningMonth { get; set; }
+        public string ClosingMonth { get; set; }
         public decimal DailyFee { get; set; }
     }
 }

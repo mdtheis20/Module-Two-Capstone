@@ -55,11 +55,24 @@ namespace CLI
         /// <returns></returns>
         protected override bool ExecuteSelection(string choice)
         {
-            switch (choice)
+            IList<Park> parks = parkSqlDAO.GetParks();
+            Park park = GetChosenPark(parks, choice);
+            Console.WriteLine(park);
+            Console.WriteLine("");
+            Console.WriteLine($@"Select a command
+    1) View Campgrounds
+    2) Search for Reservation
+    3) Return to Previous Screen");
+            string input = Console.ReadLine();
+            switch (input)
             {
                 case "1": // Do whatever option 1 is. You may prompt the user for more information
-                            // (using the Helper methods), and then pass those values into some 
-                            //business object to get something done.
+                          // (using the Helper methods), and then pass those values into some 
+                          //business object to get something done.
+                    Console.Clear();
+                    IList<Campground> campgrounds = campgroundSqlDAO.GetCampgrounds(park);
+                    PrintCampgrounds(campgrounds);
+                    Pause("");
                     int i1 = GetInteger("Enter the first integer: ");
                     int i2 = GetInteger("Enter the second integer: ");
                     Console.WriteLine($"{i1} + {i2} = {i1+i2}");
@@ -79,6 +92,15 @@ namespace CLI
             return true;
         }
 
+        private void PrintCampgrounds(IList<Campground> campgrounds)
+        {
+            Console.WriteLine("{0, -6}{1, -35}{2, -15}{3, -15}{4, 10}", " ", "Name", "Open", "Close", "Daily Fee");
+            foreach(Campground campground in campgrounds)
+            {
+                Console.WriteLine($"#{campground.Id,-5}{campground.Name,-35}{campground.OpeningMonth,-15}{campground.ClosingMonth,-15}{campground.DailyFee:C2}");
+            }
+        }
+
         protected override void BeforeDisplayMenu()
         {
             PrintHeader();
@@ -90,6 +112,17 @@ namespace CLI
             SetColor(ConsoleColor.Yellow);
             Console.WriteLine(Figgle.FiggleFonts.Standard.Render("Main Menu"));
             ResetColor();
+        }
+        protected Park GetChosenPark(IList<Park> parks, string choice)
+        {
+            foreach (Park park in parks)
+            {
+                if (park.Id == Convert.ToInt32(choice))
+                {
+                    return park;
+                }
+            }
+            return null;
         }
     }
 }

@@ -9,6 +9,21 @@ namespace Capstone.DAL
     public class CampgroundSqlDAO
     {
         private string connectionString;
+        Dictionary<int, string> months = new Dictionary<int, string>
+        {
+            { 1, "January" },
+            { 2, "February" },
+            { 3, "March" },
+            { 4, "April" },
+            { 5, "May" },
+            { 6, "June" },
+            { 7, "July" },
+            { 8, "August" },
+            { 9, "September" },
+            { 10, "October" },
+            { 11, "November" },
+            { 12, "December" }
+        };
         public CampgroundSqlDAO(string connectionString)
         {
             this.connectionString = connectionString;
@@ -30,8 +45,8 @@ namespace Capstone.DAL
                         campground.Id = Convert.ToInt32(reader["campground_id"]);
                         campground.ParkId = Convert.ToInt32(reader["park_id"]);
                         campground.Name = Convert.ToString(reader["name"]);
-                        campground.OpeningMonth = Convert.ToDateTime(reader["open_from_mm"]);
-                        campground.ClosingMonth = Convert.ToDateTime(reader["open_to_mm"]);
+                        campground.OpeningMonth = months[Convert.ToInt32(reader["open_from_mm"])];
+                        campground.ClosingMonth = months[Convert.ToInt32(reader["open_to_mm"])];
                         campground.DailyFee = Convert.ToDecimal(reader["daily_fee"]);
                         campgrounds.Add(campground);
                     }
@@ -39,10 +54,10 @@ namespace Capstone.DAL
             }
             catch (SqlException ex)
             {
-                Console.WriteLine("An error occurred returning the list of parks " + ex.Message);
+                Console.WriteLine("An error occurred returning the list of campgrounds " + ex.Message);
                 throw;
             }
-            return parks;
+            return campgrounds;
         }
     }
 }
