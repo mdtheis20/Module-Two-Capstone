@@ -11,9 +11,9 @@ namespace Capstone.DAL
         {
             this.connectionString = connectionString;
         }
-        public int ReserveSite(int chosenSite, string name)
-        {
+        //public int ReserveSite(int chosenSite, string name)
+        //{
 
-        }
+        //}
     }
 }

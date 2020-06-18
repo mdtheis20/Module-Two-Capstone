@@ -86,7 +86,20 @@ namespace CLI
             }
             DateTime chosenArrival = Convert.ToDateTime(GetString("What is the arrival date? "));
             DateTime chosenDeparture = Convert.ToDateTime(GetString("What is the departure date? "));
-            siteSqlDAO.GetAvailableSites(chosenCampground, chosenArrival, chosenDeparture);
+            int lengthOfStay = (chosenDeparture - chosenArrival).Days;
+            IList<Site> availableSites = siteSqlDAO.GetAvailableSites(chosenCampground, chosenArrival, chosenDeparture);
+            PrintReservationInfo(availableSites, lengthOfStay);
+        }
+
+        private void PrintReservationInfo(IList<Site> availableSites, int lengthOfStay)
+        {
+            Console.WriteLine("Results Matching Your Search Criteria");
+            Console.WriteLine("{0,-10}{1,-10}{2,-15}{3,-15}{4,-10}{5,-10}", "Site No.", "Max Occup.", "Accessible?", "Max RV Length", "Utility", "Cost");
+            foreach(Site site in availableSites)
+            {
+                Console.WriteLine($"{site.SiteNumber,-10}{site.MaxOccupancy,-10}{site.IsAccessible,-15}{site.MaxRVLength,-15}{site.HasUtilities,-10}{site.Cost*lengthOfStay,-10}");
+            }
+            Pause("");
         }
 
         protected override void BeforeDisplayMenu()

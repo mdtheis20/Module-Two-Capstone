@@ -39,7 +39,7 @@ namespace Capstone.DAL
                     conn.Open();
                     const string QUERY = "SELECT * FROM campground WHERE park_id = @park_id";
                     SqlCommand cmd = new SqlCommand(QUERY, conn);
-                    cmd.Parameters.AddWithValue(@"park_id", park.Id);
+                    cmd.Parameters.AddWithValue("@park_id", park.Id);
                     SqlDataReader reader = cmd.ExecuteReader();
                     while (reader.Read())
                     {
