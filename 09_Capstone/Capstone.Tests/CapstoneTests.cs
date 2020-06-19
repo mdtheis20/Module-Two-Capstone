@@ -14,7 +14,11 @@ namespace Capstone.Tests
     public class CapstoneTests
     {
         private string connectionString = "Server=.\\SQLExpress;Database=npcampground;Trusted_Connection=true;";
-
+        //private int blackwoodsSite1Id;
+        //private int blackwoodsSite2Id;
+        private int blackwoodsId;
+        //private int seawallId;
+        //private int nextReservationId;
         public TransactionScope transaction;
 
         [TestInitialize]
@@ -26,7 +30,15 @@ namespace Capstone.Tests
             {
                 conn.Open();
                 SqlCommand cmd = new SqlCommand(sqlText, conn);
-                cmd.ExecuteNonQuery();
+                SqlDataReader reader = cmd.ExecuteReader();
+                if (reader.Read())
+                {
+                    blackwoodsId = Convert.ToInt32(reader["blackwoodsId"]);
+                    //seawallId = Convert.ToInt32(reader["seawallId"]);
+                    //blackwoodsSite1Id = Convert.ToInt32(reader["blackwoodsSite1Id"]);
+                    //nextReservationId = Convert.ToInt32(reader["nextReservationId"]);
+                    //site2Id = Convert.ToInt32(reader["site2Id"]);
+                }
             }
             
         }
@@ -52,5 +64,23 @@ namespace Capstone.Tests
             IList<Campground> campgrounds = campgroundSqlDAO.GetCampgrounds(parks[0]);
             Assert.AreEqual("Blackwoods", campgrounds[0].Name);
         }
+        [TestMethod]
+        public void SiteDAOTest()
+        {
+            SiteSqlDAO siteSqlDAO = new SiteSqlDAO(connectionString);
+            DateTime fromDate = new DateTime(2020, 7, 1);
+            DateTime toDate = new DateTime(2020, 7, 5);
+            IList<Site> sites = siteSqlDAO.GetAvailableSites(this.blackwoodsId, fromDate, toDate);
+            Assert.AreEqual(2, sites.Count);
+        }
+        //[TestMethod]
+        //public void ReservationDAOTest()
+        //{
+        //    ReservationSqlDAO reservationSqlDAO = new ReservationSqlDAO(connectionString);
+        //    DateTime fromDate = new DateTime(2020, 7, 1);
+        //    DateTime toDate = new DateTime(2020, 7, 5);
+        //    int reservationId = reservationSqlDAO.ReserveSite(this.blackwoodsSite1Id, "Dwight Schrute", fromDate, toDate);
+        //    Assert.AreEqual(nextReservationId, reservationId);
+        //}
     }
 }

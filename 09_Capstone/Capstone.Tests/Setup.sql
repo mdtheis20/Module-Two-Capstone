@@ -17,7 +17,32 @@ Declare @archesId int
 Select @archesId = @@Identity
 
 INSERT INTO campground (park_id, name, open_from_mm, open_to_mm, daily_fee) VALUES (@acadiaId, 'Blackwoods', 1, 12, 35.00);
+Declare @blackwoodsId int
+Select @blackwoodsId = @@Identity
+--INSERT INTO campground (park_id, name, open_from_mm, open_to_mm, daily_fee) VALUES (@acadiaId, 'Seawall', 5, 9, 30.00);
+--Declare @seawallId int
+--Select @seawallId = @@IDENTITY
 
-INSERT INTO campground (park_id, name, open_from_mm, open_to_mm, daily_fee) VALUES (@acadiaId, 'Seawall', 5, 9, 30.00);
+INSERT INTO site (site_number, campground_id, max_occupancy, accessible, max_rv_length, utilities) VALUES (1, @blackwoodsId, 8, 1, 35, 1);
+Declare @blackwoodsSite1Id int
+Select @blackwoodsSite1Id = @@Identity
+INSERT INTO site (site_number, campground_id, max_occupancy, accessible, max_rv_length, utilities) VALUES (2, @blackwoodsId, 8, 1, 35, 1);
+Declare @blackwoodsSite2Id int
+Select @blackwoodsSite2Id = @@Identity
+--INSERT INTO site (site_number, campground_id, max_occupancy, accessible, max_rv_length, utilities) VALUES (1, @seawallId, 8, 1, 35, 1);
+--Declare @seawallSite3Id int
+--Select @seawallSite3Id = @@Identity
 
+INSERT INTO reservation (site_id, name, from_date, to_date) VALUES (@blackwoodsSite1Id, 'Smith Family Reservation', '2020-06-23', '2020-06-30');
+INSERT INTO reservation (site_id, name, from_date, to_date) VALUES (@blackwoodsSite2Id, 'Lockhart Family Reservation', '2020-07-07', '2020-07-10');
+Declare @nextReservationId int
+Select @nextReservationId = @@Identity + 1
+--INSERT INTO reservation (site_id, name, from_date, to_date) VALUES (@seawallSite3Id, 'Jones Reservation', '2020-06-30', '2020-07-04');
+
+Select @blackwoodsId AS blackwoodsId
+--Select @seawallId AS seawallId
+--Select @blackwoodsSite1Id AS blackwoodsSite1Id
+--Select @nextReservationId AS nextReservationId
+--SELECT * FROM reservation WHERE site_id = @blackwoodsSite1Id
+--Select @blackwoodsSite2Id AS blackwoodsSite2Id
 --Rollback Transaction

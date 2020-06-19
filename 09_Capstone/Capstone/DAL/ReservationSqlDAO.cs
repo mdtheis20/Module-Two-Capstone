@@ -29,7 +29,7 @@ VALUES(@chosenSite, @chosenName, @fromDate, @toDate, (SELECT GETDATE()))";
                     cmd.Parameters.AddWithValue("@toDate", toDate);
                     cmd.ExecuteNonQuery();
                     // TODO 2: Use @@IDENTITY
-                    QUERY = @"SELECT MAX(reservation_id) FROM reservation";
+                    QUERY = @"SELECT @@Identity FROM reservation";
                     cmd = new SqlCommand(QUERY, conn);
                     return Convert.ToInt32(cmd.ExecuteScalar());
                 }
