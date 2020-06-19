@@ -195,6 +195,36 @@ namespace CLI
             }
             return resultValue;
         }
+        protected DateTime GetDate(string message)
+        {
+            DateTime resultValue;
+            while (true)
+            {
+                Console.Write(message + " ");
+                string userInput = Console.ReadLine().Trim();
+                if (DateTime.TryParse(userInput, out resultValue))
+                {
+                    if (resultValue >= DateTime.Now.Date)
+                    {
+                        if (resultValue >= DateTime.Now.AddYears(1))
+                        {
+                            Console.WriteLine("You can only book one year in advance.");
+                            continue;
+                        }
+                        break;
+                    }
+                    else
+                    {
+                        Console.WriteLine("*Rafiki's voice* It's in da paast!");
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("!!! Invalid input. Please enter a valid date.");
+                }
+            }
+            return resultValue;
+        }
 
         /// <summary>
         /// This continually prompts the user until they enter a valid bool.

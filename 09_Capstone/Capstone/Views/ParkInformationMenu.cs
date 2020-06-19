@@ -1,6 +1,5 @@
 ﻿using Capstone.DAL;
 using Capstone.Models;
-using Capstone.Views;
 using System;
 using System.Collections.Generic;
 
@@ -50,9 +49,7 @@ namespace CLI
         {
             switch (choice)
             {
-                case "1": // Do whatever option 1 is. You may prompt the user for more information
-                          // (using the Helper methods), and then pass those values into some 
-                          //business object to get something done.
+                case "1":
                     Console.Clear();
                     PrintCampgrounds(campgroundSqlDAO.GetCampgrounds(park));
                     Console.WriteLine();
@@ -64,13 +61,10 @@ namespace CLI
                     {
                         ReservationProcess();
                     }
-                    return true;    // Keep running the main menu
-                case "2": // Do whatever option 2 is
+                    return true;
+                case "2":
                     ReservationProcess();
-                    return true;    // Keep running the main menu
-                                    //case "3":
-                                    //    // Create and show the sub-menu
-                                    //    return true;    // Keep running the main menu
+                    return true;
             }
             return true;
         }
@@ -80,88 +74,54 @@ namespace CLI
             Console.Clear();
             IList<Campground> campgrounds = campgroundSqlDAO.GetCampgrounds(park);
             PrintCampgrounds(campgrounds);
-            GetCampgroundDates(campgrounds);
+            Campground campground = GetCampground(campgrounds);
+            if (campground == null)
+            {
+                return;
+            }
+            GetDates(campground);
         }
 
-        private void GetCampgroundDates(IList<Campground> campgrounds)
+        private Campground GetCampground(IList<Campground> campgrounds)
         {
             while (true)
             {
                 int chosenCampground = GetInteger("Which campground (enter 0 to cancel)? ");
                 if (chosenCampground == 0)
                 {
-                    return;
+                    return null;
                 }
                 else
                 {
-                    List<int> campgroundIds = new List<int>();
                     foreach (Campground campground in campgrounds)
                     {
-                        campgroundIds.Add(campground.Id);
+                        if (campground.Id == chosenCampground)
+                        {
+                            return campground;
+                        }
                     }
-                    if (!campgroundIds.Contains(chosenCampground))
-                    {
-                        Console.WriteLine("Please choose a campground from the list above.");
-                        Pause("");
-                        continue;
-                    }
+                    Console.WriteLine("Please choose a campground from the list above.");
+                    Pause("");
                 }
-                DateTime chosenArrival = ConvertToDate("What is the arrival date? (mm/dd/yyyy)");
-                DateTime chosenDeparture = ConvertToDate("What is the departure date? (mm/dd/yyyy)");
+            }
+        }
+        private void GetDates(Campground chosenCampground)
+        {
+            while (true)
+            {
+                DateTime chosenArrival = GetDate("What is the arrival date? (mm/dd/yyyy)");
+                DateTime chosenDeparture = GetDate("What is the departure date? (mm/dd/yyyy)");
                 if (chosenArrival >= chosenDeparture)
                 {
                     Console.WriteLine("Departure date must be after arrival date.");
                     Pause("");
                     continue;
                 }
-                int lengthOfStay = (chosenDeparture - chosenArrival).Days;
-                MakeReservation(chosenCampground, chosenArrival, chosenDeparture, lengthOfStay);
+                MakeReservation(chosenCampground.Id, chosenArrival, chosenDeparture);
+                break;
             }
         }
-
-        private DateTime ConvertToDate(string message)
-        {
-            DateTime resultValue;
-            while (true)
-            {
-                Console.Write(message + " ");
-                string userInput = Console.ReadLine().Trim();
-                if (DateTime.TryParse(userInput, out resultValue))
-                {
-                    if (resultValue >= DateTime.Now.Date)
-                    {
-                        if (resultValue >= DateTime.Now.AddYears(1))
-                        {
-                            Console.WriteLine("You can only book one year in advance.");
-                            continue;
-                        }
-                        break;
-                    }
-                    else
-                    {
-                        Console.WriteLine("Rafiki's voice: It's in da paast!");
-                    }
-                }
-                else
-                {
-                    Console.WriteLine("!!! Invalid input. Please enter a valid date.");
-                }
-            }
-            return resultValue;
-            //DateTime chosenArrival;
-            //try
-            //{
-            //    chosenArrival = Convert.ToDateTime(GetString(message));
-            //}
-            //catch (Exception ex)
-            //{
-            //    Console.WriteLine("Please enter a valid date. " + ex.Message);
-            //    throw;
-            //}
-            //return chosenArrival;
-        }
-
-        private void MakeReservation(int chosenCampground, DateTime chosenArrival, DateTime chosenDeparture, int lengthOfStay)
+        private void MakeReservation(int chosenCampground, DateTime chosenArrival, DateTime chosenDeparture)
         {
             IList<Site> availableSites = siteSqlDAO.GetAvailableSites(chosenCampground, chosenArrival, chosenDeparture);
             if (availableSites.Count == 0)
@@ -173,7 +133,7 @@ namespace CLI
             {
                 while (true)
                 {
-                    PrintAvailableSites(availableSites, lengthOfStay);
+                    PrintAvailableSites(availableSites, (chosenDeparture - chosenArrival).Days);
                     int chosenSite = GetInteger("Which site should be reserved (enter 0 to cancel)? ");
                     if (chosenSite == 0)
                     {

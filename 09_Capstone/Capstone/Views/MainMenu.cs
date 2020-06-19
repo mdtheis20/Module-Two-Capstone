@@ -53,7 +53,7 @@ namespace CLI
         protected override bool ExecuteSelection(string choice)
         {
             IList<Park> parks = parkSqlDAO.GetParks();
-            Park park = GetChosenPark(parks, choice);
+            Park park = parks[int.Parse(choice) - 1];
             ParkInformationMenu submenu = new ParkInformationMenu(park, parkSqlDAO, campgroundSqlDAO, siteSqlDAO, reservationSqlDAO);
             submenu.Run();
             return true;
@@ -69,17 +69,6 @@ namespace CLI
             SetColor(ConsoleColor.Yellow);
             Console.WriteLine(Figgle.FiggleFonts.Standard.Render("Main Menu"));
             ResetColor();
-        }
-        public Park GetChosenPark(IList<Park> parks, string choice)
-        {
-            foreach (Park park in parks)
-            {
-                if (park.Id == Convert.ToInt32(choice))
-                {
-                    return park;
-                }
-            }
-            return null;
         }
     }
 }
