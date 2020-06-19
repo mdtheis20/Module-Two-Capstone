@@ -36,16 +36,17 @@ namespace Capstone.DAL
                     SqlDataReader reader = cmd.ExecuteReader();
                     while (reader.Read())
                     {
-                        Site site = new Site();
-
-                        site.Id = Convert.ToInt32(reader["site_id"]);
-                        site.CampgroundId = Convert.ToInt32(reader["campground_id"]);
-                        site.SiteNumber = Convert.ToInt32(reader["site_number"]);
-                        site.MaxOccupancy = Convert.ToInt32(reader["max_occupancy"]);
-                        site.IsAccessible = Convert.ToBoolean(reader["accessible"]);
-                        site.MaxRVLength = Convert.ToInt32(reader["max_rv_length"]);
-                        site.HasUtilities = Convert.ToBoolean(reader["utilities"]);
-                        site.Cost = Convert.ToDecimal(reader["daily_fee"]);
+                        Site site = new Site
+                        {
+                            Id = Convert.ToInt32(reader["site_id"]),
+                            CampgroundId = Convert.ToInt32(reader["campground_id"]),
+                            SiteNumber = Convert.ToInt32(reader["site_number"]),
+                            MaxOccupancy = Convert.ToInt32(reader["max_occupancy"]),
+                            IsAccessible = Convert.ToBoolean(reader["accessible"]),
+                            MaxRVLength = Convert.ToInt32(reader["max_rv_length"]),
+                            HasUtilities = Convert.ToBoolean(reader["utilities"]),
+                            Cost = Convert.ToDecimal(reader["daily_fee"])
+                        };
 
                         sites.Add(site);
                     }

@@ -35,8 +35,9 @@ namespace CLI
         {
             this.menuOptions.Add("1", "View Campgrounds");
             this.menuOptions.Add("2", "Search for Reservation");
-            this.menuOptions.Add("3", "Return to Previous Screen");
-            this.quitKey = "3";
+            this.menuOptions.Add("3", "View all Reservations");
+            this.menuOptions.Add("4", "Return to Previous Screen");
+            this.quitKey = "4";
         }
 
         /// <summary>
@@ -65,6 +66,15 @@ namespace CLI
                 case "2":
                     ReservationProcess();
                     return true;
+                case "3":
+                    List<Reservation> reservations = reservationSqlDAO.ViewReservations(park.Id);
+                    Console.WriteLine("{0,-4}{1,-8}{2,-40}{3,15}{4,15}", "Id","Site Id","Name","From Date","To Date");
+                    foreach(Reservation reservation in reservations)
+                    {
+                        Console.WriteLine(reservation);
+                    }
+                    Pause("");
+                    return true;
             }
             return true;
         }
@@ -79,7 +89,7 @@ namespace CLI
             {
                 return;
             }
-            GetDates(campground);
+            GetChosenDates(campground);
         }
 
         private Campground GetCampground(IList<Campground> campgrounds)
@@ -105,7 +115,7 @@ namespace CLI
                 }
             }
         }
-        private void GetDates(Campground chosenCampground)
+        private void GetChosenDates(Campground chosenCampground)
         {
             while (true)
             {
@@ -117,13 +127,20 @@ namespace CLI
                     Pause("");
                     continue;
                 }
+                if (chosenArrival.Month < chosenCampground.OpeningMonth || chosenDeparture.Month > chosenCampground.ClosingMonth)
+                {
+                    Console.WriteLine("The campground is not open during those dates. ");
+                    Pause("");
+                    break;
+                }
+                // if the campground is not open during this time, then break
                 MakeReservation(chosenCampground.Id, chosenArrival, chosenDeparture);
                 break;
             }
         }
-        private void MakeReservation(int chosenCampground, DateTime chosenArrival, DateTime chosenDeparture)
+        private void MakeReservation(int chosenCampgroundId, DateTime chosenArrival, DateTime chosenDeparture)
         {
-            IList<Site> availableSites = siteSqlDAO.GetAvailableSites(chosenCampground, chosenArrival, chosenDeparture);
+            IList<Site> availableSites = siteSqlDAO.GetAvailableSites(chosenCampgroundId, chosenArrival, chosenDeparture);
             if (availableSites.Count == 0)
             {
                 Console.WriteLine("There are no available sites matching your timeline. Please enter an alternate date range. ");

@@ -9,22 +9,6 @@ namespace Capstone.DAL
     public class CampgroundSqlDAO
     {
         private string connectionString;
-        
-        Dictionary<int, string> months = new Dictionary<int, string>
-        {
-            { 1, "January" },
-            { 2, "February" },
-            { 3, "March" },
-            { 4, "April" },
-            { 5, "May" },
-            { 6, "June" },
-            { 7, "July" },
-            { 8, "August" },
-            { 9, "September" },
-            { 10, "October" },
-            { 11, "November" },
-            { 12, "December" }
-        };
         public CampgroundSqlDAO(string connectionString)
         {
             this.connectionString = connectionString;
@@ -43,13 +27,15 @@ namespace Capstone.DAL
                     SqlDataReader reader = cmd.ExecuteReader();
                     while (reader.Read())
                     {
-                        Campground campground = new Campground();
-                        campground.Id = Convert.ToInt32(reader["campground_id"]);
-                        campground.ParkId = Convert.ToInt32(reader["park_id"]);
-                        campground.Name = Convert.ToString(reader["name"]);
-                        campground.OpeningMonth = months[Convert.ToInt32(reader["open_from_mm"])];
-                        campground.ClosingMonth = months[Convert.ToInt32(reader["open_to_mm"])];
-                        campground.DailyFee = Convert.ToDecimal(reader["daily_fee"]);
+                        Campground campground = new Campground
+                        {
+                            Id = Convert.ToInt32(reader["campground_id"]),
+                            ParkId = Convert.ToInt32(reader["park_id"]),
+                            Name = Convert.ToString(reader["name"]),
+                            OpeningMonth = Convert.ToInt32(reader["open_from_mm"]),
+                            ClosingMonth = Convert.ToInt32(reader["open_to_mm"]),
+                            DailyFee = Convert.ToDecimal(reader["daily_fee"])
+                        };
                         campgrounds.Add(campground);
                     }
                 }

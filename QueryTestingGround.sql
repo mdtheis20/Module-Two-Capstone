@@ -1,5 +1,4 @@
 ALTER AUTHORIZATION ON DATABASE::npcampground TO [sa]
-
 SELECT * FROM campground
 SELECT * FROM park
 SELECT * FROM reservation

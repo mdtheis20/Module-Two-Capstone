@@ -27,14 +27,16 @@ namespace Capstone.DAL
                     SqlDataReader reader = cmd.ExecuteReader();
                     while (reader.Read())
                     {
-                        Park park = new Park();
-                        park.Id = Convert.ToInt32(reader["park_id"]);
-                        park.Name = Convert.ToString(reader["name"]);
-                        park.Location = Convert.ToString(reader["location"]);
-                        park.EstablishDate = Convert.ToDateTime(reader["establish_date"]);
-                        park.Area = Convert.ToInt32(reader["area"]);
-                        park.Visitors = Convert.ToInt32(reader["visitors"]);
-                        park.Description = Convert.ToString(reader["description"]);
+                        Park park = new Park
+                        {
+                            Id = Convert.ToInt32(reader["park_id"]),
+                            Name = Convert.ToString(reader["name"]),
+                            Location = Convert.ToString(reader["location"]),
+                            EstablishDate = Convert.ToDateTime(reader["establish_date"]),
+                            Area = Convert.ToInt32(reader["area"]),
+                            Visitors = Convert.ToInt32(reader["visitors"]),
+                            Description = Convert.ToString(reader["description"])
+                        };
                         parks.Add(park);
                     }
                 }
