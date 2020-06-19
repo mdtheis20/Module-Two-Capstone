@@ -48,15 +48,13 @@ namespace CLI
         /// <returns></returns>
         protected override bool ExecuteSelection(string choice)
         {
-            ReservationMenu reservationMenu = new ReservationMenu();
             switch (choice)
             {
                 case "1": // Do whatever option 1 is. You may prompt the user for more information
                           // (using the Helper methods), and then pass those values into some 
                           //business object to get something done.
                     Console.Clear();
-                    IList<Campground> campgrounds = campgroundSqlDAO.GetCampgrounds(park);
-                    PrintCampgrounds(campgrounds);
+                    PrintCampgrounds(campgroundSqlDAO.GetCampgrounds(park));
                     Console.WriteLine();
                     Console.WriteLine(@"Select a Command
     1) Search for Available Reservation
@@ -64,11 +62,11 @@ namespace CLI
                     string input = Console.ReadLine();
                     if (input == "1")
                     {
-                        GetReservationInfo();
+                        ReservationProcess();
                     }
                     return true;    // Keep running the main menu
                 case "2": // Do whatever option 2 is
-                    GetReservationInfo();
+                    ReservationProcess();
                     return true;    // Keep running the main menu
                 //case "3":
                 //    // Create and show the sub-menu
@@ -77,29 +75,47 @@ namespace CLI
             return true;
         }
 
-        private void GetReservationInfo()
+        private void ReservationProcess()
+        {
+            Console.Clear();
+            PrintCampgrounds(campgroundSqlDAO.GetCampgrounds(park));
+            MakeReservation();
+            
+        }
+
+        private void MakeReservation()
         {
             int chosenCampground = GetInteger("Which campground (enter 0 to cancel)? ");
             if (chosenCampground == 0)
             {
                 return;
             }
-            DateTime chosenArrival = Convert.ToDateTime(GetString("What is the arrival date? "));
-            DateTime chosenDeparture = Convert.ToDateTime(GetString("What is the departure date? "));
+            DateTime chosenArrival = Convert.ToDateTime(GetString("What is the arrival date? (mm/dd/yyyy)"));
+            DateTime chosenDeparture = Convert.ToDateTime(GetString("What is the departure date? (mm/dd/yyyy)"));
+            if (chosenArrival >= chosenDeparture)
+            {
+                Console.WriteLine("Departure date must be after arrival date.");
+                Pause("");
+                return;
+            }
             int lengthOfStay = (chosenDeparture - chosenArrival).Days;
             IList<Site> availableSites = siteSqlDAO.GetAvailableSites(chosenCampground, chosenArrival, chosenDeparture);
-            PrintReservationInfo(availableSites, lengthOfStay);
+            PrintAvailableSites(availableSites, lengthOfStay);
+            int chosenSite = GetInteger("Which site should be reserved (enter 0 to cancel)? ");
+            string chosenName = GetString("Which name should the reservation be made under? ");
+            int confirmationId = reservationSqlDAO.ReserveSite(chosenSite, chosenName, chosenArrival, chosenDeparture);
+            Console.WriteLine($"The reservation has been made and the confirmation id is {confirmationId}");
+            Console.ReadLine();
         }
 
-        private void PrintReservationInfo(IList<Site> availableSites, int lengthOfStay)
+        private void PrintAvailableSites(IList<Site> availableSites, int lengthOfStay)
         {
             Console.WriteLine("Results Matching Your Search Criteria");
-            Console.WriteLine("{0,-10}{1,-10}{2,-15}{3,-15}{4,-10}{5,-10}", "Site No.", "Max Occup.", "Accessible?", "Max RV Length", "Utility", "Cost");
+            Console.WriteLine("{0,-10}{1,-15}{2,-15}{3,-15}{4,-10}{5,-10}", "Site No.", "Max Occup.", "Accessible?", "Max RV Length", "Utility", "Cost");
             foreach(Site site in availableSites)
             {
-                Console.WriteLine($"{site.SiteNumber,-10}{site.MaxOccupancy,-10}{site.IsAccessible,-15}{site.MaxRVLength,-15}{site.HasUtilities,-10}{site.Cost*lengthOfStay,-10}");
+                Console.WriteLine($"{site.SiteNumber,-10}{site.MaxOccupancy,-15}{site.IsAccessible,-15}{site.MaxRVLength,-15}{site.HasUtilities,-10}{site.Cost*lengthOfStay,-10}");
             }
-            Pause("");
         }
 
         protected override void BeforeDisplayMenu()

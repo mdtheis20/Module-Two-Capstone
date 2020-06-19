@@ -5,11 +5,11 @@ SELECT * FROM park
 SELECT * FROM reservation
 SELECT * FROM site
 declare @campground_id int
-select @campground_id = 2
+select @campground_id = 1
 declare @from_date date
-select @from_date = '2020-06-14'
+select @from_date = '2020-06-18'
 declare @to_date date
-select @to_date = '2020-06-19'
+select @to_date = '2020-06-23'
 SELECT DISTINCT site.site_id, campground.campground_id, site.site_number, site.max_occupancy, site.accessible, site.max_rv_length, site.utilities, campground.daily_fee
 	FROM site
 	JOIN campground ON site.campground_id = campground.campground_id
@@ -20,4 +20,12 @@ SELECT DISTINCT site.site_id, campground.campground_id, site.site_number, site.m
 SELECT *
 	FROM site
 	LEFT JOIN reservation ON site.site_id = reservation.site_id
-	WHERE campground_id = 2
+	WHERE campground_id = 1
+
+declare @from_date date
+select @from_date = '2020-06-14'
+declare @to_date date
+select @to_date = '2020-06-19'
+
+SELECT *
+FROM campground
