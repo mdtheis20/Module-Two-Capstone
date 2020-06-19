@@ -68,9 +68,9 @@ namespace CLI
                 case "2": // Do whatever option 2 is
                     ReservationProcess();
                     return true;    // Keep running the main menu
-                //case "3":
-                //    // Create and show the sub-menu
-                //    return true;    // Keep running the main menu
+                                    //case "3":
+                                    //    // Create and show the sub-menu
+                                    //    return true;    // Keep running the main menu
             }
             return true;
         }
@@ -78,43 +78,135 @@ namespace CLI
         private void ReservationProcess()
         {
             Console.Clear();
-            PrintCampgrounds(campgroundSqlDAO.GetCampgrounds(park));
-            MakeReservation();
-            
+            IList<Campground> campgrounds = campgroundSqlDAO.GetCampgrounds(park);
+            PrintCampgrounds(campgrounds);
+            GetCampgroundDates(campgrounds);
         }
 
-        private void MakeReservation()
+        private void GetCampgroundDates(IList<Campground> campgrounds)
         {
-            int chosenCampground = GetInteger("Which campground (enter 0 to cancel)? ");
-            if (chosenCampground == 0)
+            while (true)
             {
-                return;
+                int chosenCampground = GetInteger("Which campground (enter 0 to cancel)? ");
+                if (chosenCampground == 0)
+                {
+                    return;
+                }
+                else
+                {
+                    List<int> campgroundIds = new List<int>();
+                    foreach (Campground campground in campgrounds)
+                    {
+                        campgroundIds.Add(campground.Id);
+                    }
+                    if (!campgroundIds.Contains(chosenCampground))
+                    {
+                        Console.WriteLine("Please choose a campground from the list above.");
+                        Pause("");
+                        continue;
+                    }
+                }
+                DateTime chosenArrival = ConvertToDate("What is the arrival date? (mm/dd/yyyy)");
+                DateTime chosenDeparture = ConvertToDate("What is the departure date? (mm/dd/yyyy)");
+                if (chosenArrival >= chosenDeparture)
+                {
+                    Console.WriteLine("Departure date must be after arrival date.");
+                    Pause("");
+                    continue;
+                }
+                int lengthOfStay = (chosenDeparture - chosenArrival).Days;
+                MakeReservation(chosenCampground, chosenArrival, chosenDeparture, lengthOfStay);
             }
-            DateTime chosenArrival = Convert.ToDateTime(GetString("What is the arrival date? (mm/dd/yyyy)"));
-            DateTime chosenDeparture = Convert.ToDateTime(GetString("What is the departure date? (mm/dd/yyyy)"));
-            if (chosenArrival >= chosenDeparture)
+        }
+
+        private DateTime ConvertToDate(string message)
+        {
+            DateTime resultValue;
+            while (true)
             {
-                Console.WriteLine("Departure date must be after arrival date.");
-                Pause("");
-                return;
+                Console.Write(message + " ");
+                string userInput = Console.ReadLine().Trim();
+                if (DateTime.TryParse(userInput, out resultValue))
+                {
+                    if (resultValue >= DateTime.Now.Date)
+                    {
+                        if (resultValue >= DateTime.Now.AddYears(1))
+                        {
+                            Console.WriteLine("You can only book one year in advance.");
+                            continue;
+                        }
+                        break;
+                    }
+                    else
+                    {
+                        Console.WriteLine("Rafiki's voice: It's in da paast!");
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("!!! Invalid input. Please enter a valid date.");
+                }
             }
-            int lengthOfStay = (chosenDeparture - chosenArrival).Days;
+            return resultValue;
+            //DateTime chosenArrival;
+            //try
+            //{
+            //    chosenArrival = Convert.ToDateTime(GetString(message));
+            //}
+            //catch (Exception ex)
+            //{
+            //    Console.WriteLine("Please enter a valid date. " + ex.Message);
+            //    throw;
+            //}
+            //return chosenArrival;
+        }
+
+        private void MakeReservation(int chosenCampground, DateTime chosenArrival, DateTime chosenDeparture, int lengthOfStay)
+        {
             IList<Site> availableSites = siteSqlDAO.GetAvailableSites(chosenCampground, chosenArrival, chosenDeparture);
-            PrintAvailableSites(availableSites, lengthOfStay);
-            int chosenSite = GetInteger("Which site should be reserved (enter 0 to cancel)? ");
-            string chosenName = GetString("Which name should the reservation be made under? ");
-            int confirmationId = reservationSqlDAO.ReserveSite(chosenSite, chosenName, chosenArrival, chosenDeparture);
-            Console.WriteLine($"The reservation has been made and the confirmation id is {confirmationId}");
-            Console.ReadLine();
+            if (availableSites.Count == 0)
+            {
+                Console.WriteLine("There are no available sites matching your timeline. Please enter an alternate date range. ");
+                return;
+            }
+            else
+            {
+                while (true)
+                {
+                    PrintAvailableSites(availableSites, lengthOfStay);
+                    int chosenSite = GetInteger("Which site should be reserved (enter 0 to cancel)? ");
+                    if (chosenSite == 0)
+                    {
+                        break;
+                    }
+                    List<int> siteNumbers = new List<int>();
+                    foreach (Site site in availableSites)
+                    {
+                        siteNumbers.Add(site.SiteNumber);
+                    }
+                    if (!siteNumbers.Contains(chosenSite))
+                    {
+                        Console.WriteLine("Please choose a site from the list above.");
+                        Pause("");
+                        Console.Clear();
+                        continue;
+                    }
+                    string chosenName = GetString("Which name should the reservation be made under? ");
+                    int confirmationId = reservationSqlDAO.ReserveSite(chosenSite, chosenName, chosenArrival, chosenDeparture);
+                    Console.WriteLine($"The reservation has been made and the confirmation id is {confirmationId}");
+                    Console.ReadLine();
+                    break;
+                }
+            }
         }
 
         private void PrintAvailableSites(IList<Site> availableSites, int lengthOfStay)
         {
             Console.WriteLine("Results Matching Your Search Criteria");
             Console.WriteLine("{0,-10}{1,-15}{2,-15}{3,-15}{4,-10}{5,-10}", "Site No.", "Max Occup.", "Accessible?", "Max RV Length", "Utility", "Cost");
-            foreach(Site site in availableSites)
+            foreach (Site site in availableSites)
             {
-                Console.WriteLine($"{site.SiteNumber,-10}{site.MaxOccupancy,-15}{site.IsAccessible,-15}{site.MaxRVLength,-15}{site.HasUtilities,-10}{site.Cost*lengthOfStay,-10}");
+                Console.WriteLine($"{site.SiteNumber,-10}{site.MaxOccupancy,-15}{site.IsAccessible,-15}{site.MaxRVLength,-15}{site.HasUtilities,-10}{site.Cost * lengthOfStay:C2}");
             }
         }
 

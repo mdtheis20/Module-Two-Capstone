@@ -20,14 +20,17 @@ namespace Capstone.DAL
                 {
                     conn.Open();
 
-                    const string QUERY = @"INSERT reservation (site_id, name, from_date, to_date, create_date)
+                    string QUERY = @"INSERT reservation (site_id, name, from_date, to_date, create_date)
 VALUES(@chosenSite, @chosenName, @fromDate, @toDate, (SELECT GETDATE()))";
                     SqlCommand cmd = new SqlCommand(QUERY, conn);
                     cmd.Parameters.AddWithValue("@chosenSite", chosenSite);
                     cmd.Parameters.AddWithValue("@chosenName", chosenName);
                     cmd.Parameters.AddWithValue("@fromDate", fromDate);
                     cmd.Parameters.AddWithValue("@toDate", toDate);
+                    cmd.ExecuteNonQuery();
 
+                    QUERY = @"SELECT MAX(reservation_id) FROM reservation";
+                    cmd = new SqlCommand(QUERY, conn);
                     return Convert.ToInt32(cmd.ExecuteScalar());
                 }
             }
