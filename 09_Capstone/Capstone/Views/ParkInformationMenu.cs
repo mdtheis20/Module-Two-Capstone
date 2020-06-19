@@ -166,7 +166,7 @@ namespace CLI
             Console.WriteLine("{0,-10}{1,-15}{2,-15}{3,-15}{4,-10}{5,-10}", "Site No.", "Max Occup.", "Accessible?", "Max RV Length", "Utility", "Cost");
             foreach (Site site in availableSites)
             {
-                Console.WriteLine($"{site.SiteNumber,-10}{site.MaxOccupancy,-15}{site.IsAccessible,-15}{site.MaxRVLength,-15}{site.HasUtilities,-10}{site.Cost * lengthOfStay:C2}");
+                Console.WriteLine($"{site.SiteNumber,-10}{site.MaxOccupancy,-15}{site.PrintIsAccessible,-15}{site.MaxRVLength,-15}{site.PrintHasUtilities,-10}{site.Cost * lengthOfStay:C2}");
             }
         }
 
