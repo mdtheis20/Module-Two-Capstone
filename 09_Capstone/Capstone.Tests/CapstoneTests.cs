@@ -70,7 +70,7 @@ namespace Capstone.Tests
             SiteSqlDAO siteSqlDAO = new SiteSqlDAO(connectionString);
             DateTime fromDate = new DateTime(2020, 7, 1);
             DateTime toDate = new DateTime(2020, 7, 5);
-            IList<Site> sites = siteSqlDAO.GetAvailableSites(this.blackwoodsId, fromDate, toDate);
+            IList<Site> sites = siteSqlDAO.GetAvailableSitesAcrossCampground(this.blackwoodsId, fromDate, toDate);
             Assert.AreEqual(2, sites.Count);
         }
         //[TestMethod]

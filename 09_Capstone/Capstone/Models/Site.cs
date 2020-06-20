@@ -8,6 +8,7 @@ namespace Capstone.Models
     {
         public int Id { get; set; }
         public int CampgroundId { get; set; }
+        public string CampgroundName { get; set; }
         public int SiteNumber { get; set; }
         public int MaxOccupancy { get; set; }
         public bool IsAccessible { get; set; }

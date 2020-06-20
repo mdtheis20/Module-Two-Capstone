@@ -28,3 +28,9 @@ select @to_date = '2020-06-19'
 
 SELECT *
 FROM campground
+
+SELECT * FROM reservation r
+	JOIN site s ON r.site_id = s.site_id
+	JOIN campground c ON s.campground_id = c.campground_id
+	JOIN park p ON c.park_id = p.park_id
+	WHERE from_date <= GETDATE()+30
