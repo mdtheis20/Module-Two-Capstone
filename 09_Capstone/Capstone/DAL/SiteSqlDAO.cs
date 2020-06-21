@@ -48,28 +48,13 @@ namespace Capstone.DAL
             }
             return sites;
         }
-
-        private static Site ReadToSite(SqlDataReader reader)
-        {
-            return new Site
-            {
-                Id = Convert.ToInt32(reader["site_id"]),
-                CampgroundName = Convert.ToString(reader["name"]),
-                CampgroundId = Convert.ToInt32(reader["campground_id"]),
-                SiteNumber = Convert.ToInt32(reader["site_number"]),
-                MaxOccupancy = Convert.ToInt32(reader["max_occupancy"]),
-                IsAccessible = Convert.ToBoolean(reader["accessible"]),
-                MaxRVLength = Convert.ToInt32(reader["max_rv_length"]),
-                HasUtilities = Convert.ToBoolean(reader["utilities"]),
-                Cost = Convert.ToDecimal(reader["daily_fee"])
-            };
-        }
-
         public IList<Site> GetAvailableSitesAcrossPark(int chosenParkId, DateTime chosenArrival, DateTime chosenDeparture)
         {
             List<Site> sites = new List<Site>();
             try
             {
+                int chosenArrivalMonth = chosenArrival.Month;
+                int chosenDepartureMonth = chosenDeparture.Month;
                 using (SqlConnection conn = new SqlConnection(connectionString))
                 {
                     conn.Open();
@@ -77,7 +62,7 @@ namespace Capstone.DAL
 	FROM campground
 	JOIN site ON campground.campground_id = site.campground_id
 	LEFT JOIN reservation ON site.site_id = reservation.site_id
-	WHERE park_id = @park_id AND site.site_id NOT IN (SELECT site.site_id FROM site
+	WHERE park_id = @park_id AND open_from_mm <= @from_month AND open_to_mm >= @to_month AND site.site_id NOT IN (SELECT site.site_id FROM site
 	LEFT JOIN reservation ON site.site_id = reservation.site_id
 	WHERE park_id = @park_id AND from_date < @to_date AND to_date > @from_date)";
 
@@ -85,6 +70,8 @@ namespace Capstone.DAL
                     cmd.Parameters.AddWithValue("@park_id", chosenParkId);
                     cmd.Parameters.AddWithValue("@to_date", chosenDeparture);
                     cmd.Parameters.AddWithValue("@from_date", chosenArrival);
+                    cmd.Parameters.AddWithValue("@from_month", chosenArrivalMonth);
+                    cmd.Parameters.AddWithValue("@to_month", chosenDepartureMonth);
                     SqlDataReader reader = cmd.ExecuteReader();
                     while (reader.Read())
                     {
@@ -99,6 +86,21 @@ namespace Capstone.DAL
                 Console.WriteLine("Error returning the available sites " + ex.Message);
             }
             return sites;
+        }
+        private static Site ReadToSite(SqlDataReader reader)
+        {
+            return new Site
+            {
+                Id = Convert.ToInt32(reader["site_id"]),
+                CampgroundName = Convert.ToString(reader["name"]),
+                CampgroundId = Convert.ToInt32(reader["campground_id"]),
+                SiteNumber = Convert.ToInt32(reader["site_number"]),
+                MaxOccupancy = Convert.ToInt32(reader["max_occupancy"]),
+                IsAccessible = Convert.ToBoolean(reader["accessible"]),
+                MaxRVLength = Convert.ToInt32(reader["max_rv_length"]),
+                HasUtilities = Convert.ToBoolean(reader["utilities"]),
+                Cost = Convert.ToDecimal(reader["daily_fee"])
+            };
         }
     }
 }

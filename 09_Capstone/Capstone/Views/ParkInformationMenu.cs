@@ -11,13 +11,13 @@ namespace CLI
     public class ParkInformationMenu : CLIMenu
     {
         // Store any private variables here....
-        Park park;
-        ParkSqlDAO parkSqlDAO;
-        CampgroundSqlDAO campgroundSqlDAO;
-        SiteSqlDAO siteSqlDAO;
-        ReservationSqlDAO reservationSqlDAO;
-        DateTime chosenArrival;
-        DateTime chosenDeparture;
+        private Park park;
+        private ParkSqlDAO parkSqlDAO;
+        private CampgroundSqlDAO campgroundSqlDAO;
+        private SiteSqlDAO siteSqlDAO;
+        private ReservationSqlDAO reservationSqlDAO;
+        private DateTime chosenArrival;
+        private DateTime chosenDeparture;
 
         /// <summary>
         /// Constructor adds items to the top-level menu
@@ -54,45 +54,82 @@ namespace CLI
             {
                 case "1":
                     Console.Clear();
-                    Campground chosenCampground = ChooseCampground();
+                    Campground chosenCampground = ChooseCampgroundSetDates();
                     if (chosenCampground == null)
                     {
                         return true;
                     }
                     IList<Site> availableSitesInCampground = siteSqlDAO.GetAvailableSitesAcrossCampground(chosenCampground.Id, chosenArrival, chosenDeparture);
-                    if (availableSitesInCampground.Count == 0)
-                    {
-                        Console.WriteLine("There are no available sites matching your timeline. Please enter an alternate date range. ");
-                        Pause("");
-                        return true;
-                    }
-                    PrintAvailableSites(availableSitesInCampground, (chosenDeparture - chosenArrival).Days);
-                    FinishReservation(availableSitesInCampground, chosenArrival, chosenDeparture);
+                    ReservationProcess(availableSitesInCampground);
                     return true;
                 case "2":
                     Console.Clear();
                     GetArrivalAndDepartureDates();
                     IList<Site> availableSitesInPark = siteSqlDAO.GetAvailableSitesAcrossPark(park.Id, chosenArrival, chosenDeparture);
-                    if (availableSitesInPark.Count == 0)
-                    {
-                        Console.WriteLine("There are no available sites matching your date range.");
-                        Pause("");
-                        return true;
-                    }
-                    PrintAvailableSites(availableSitesInPark, (chosenDeparture - chosenArrival).Days);
-                    FinishReservation(availableSitesInPark, chosenArrival, chosenDeparture);
+                    ReservationProcess(availableSitesInPark);
                     return true;
                 case "3":
                     List<Reservation> reservations = reservationSqlDAO.ViewReservations(park.Id);
-                    Console.WriteLine("{0,-4}{1,-8}{2,-40}{3,15}{4,15}", "Id","Site Id","Name","From Date","To Date");
-                    foreach(Reservation reservation in reservations)
-                    {
-                        Console.WriteLine(reservation);
-                    }
-                    Pause("");
+                    PrintReservations(reservations);
                     return true;
             }
             return true;
+        }
+
+        private static void PrintReservations(List<Reservation> reservations)
+        {
+            Console.WriteLine("{0,-4}{1,-8}{2,-40}{3,15}{4,15}", "Id", "Site Id", "Name", "From Date", "To Date");
+            foreach (Reservation reservation in reservations)
+            {
+                Console.WriteLine(reservation);
+            }
+            Pause("");
+        }
+
+        private void ReservationProcess(IList<Site> availableSites)
+        {
+            if (!CheckThatAvailableSiteExists(availableSites))
+            {
+                return;
+            }
+            availableSites = FilterSitesForAdvancedFeatures(availableSites);
+            if (!CheckThatAvailableSiteExists(availableSites))
+            {
+                return;
+            }
+            PrintAvailableSites(availableSites, (chosenDeparture - chosenArrival).Days);
+            FinishReservation(availableSites, chosenArrival, chosenDeparture);
+        }
+
+        private bool CheckThatAvailableSiteExists(IList<Site> availableSites)
+        {
+            if (availableSites.Count == 0)
+            {
+                Console.WriteLine("There are no available sites matching your timeline. Please enter an alternate date range or choose a new location. ");
+                Pause("");
+                return false;
+            }
+            return true;
+        }
+
+        private IList<Site> FilterSitesForAdvancedFeatures(IList<Site> availableSites)
+        {
+            int maximumOccupancy = GetInteger("How many people are in your party?");
+            bool needsAccessibleSite = GetBool("Do you require wheelchair access?");
+            int rvLength = 0;
+            if (GetBool("Do you have an RV?"))
+            {
+                rvLength = GetInteger("How long is your RV?");
+            }
+            bool needsUtilities = GetBool("Do you need a utility hookup?");
+            for (int i = availableSites.Count - 1; i >= 0; i--)
+            {
+                if ((availableSites[i].MaxOccupancy < maximumOccupancy) || (needsAccessibleSite && !availableSites[i].IsAccessible) || (availableSites[i].MaxRVLength < rvLength) || (needsUtilities && !availableSites[i].HasUtilities))
+                {
+                    availableSites.Remove(availableSites[i]);
+                }
+            }
+            return availableSites;
         }
 
         private void GetArrivalAndDepartureDates()
@@ -111,18 +148,18 @@ namespace CLI
             }
         }
 
-        private Campground ChooseCampground()
+        private Campground ChooseCampgroundSetDates()
         {
-            Console.Clear();
-            IList<Campground> campgrounds = campgroundSqlDAO.GetCampgrounds(park);
-            PrintCampgrounds(campgrounds);
-            Campground campground = GetChosenCampground(campgrounds);
-            if (campground == null)
-            {
-                return null;
-            }
             while (true)
             {
+                Console.Clear();
+                IList<Campground> campgrounds = campgroundSqlDAO.GetCampgrounds(park);
+                PrintCampgrounds(campgrounds);
+                Campground campground = GetChosenCampground(campgrounds);
+                if (campground == null)
+                {
+                    return null;
+                }
                 GetArrivalAndDepartureDates();
                 if (chosenArrival.Month < campground.OpeningMonth || chosenDeparture.Month > campground.ClosingMonth)
                 {
@@ -186,13 +223,13 @@ namespace CLI
                 Console.ReadLine();
                 break;
             }
-            
+
         }
 
         private void PrintAvailableSites(IList<Site> availableSites, int lengthOfStay)
         {
             Console.WriteLine("Results Matching Your Search Criteria");
-            Console.WriteLine("{0,-15}{1,-10}{2,-15}{3,-15}{4,-15}{5,-10}{6,-10}", "Campground","Site No.", "Max Occup.", "Accessible?", "Max RV Length", "Utility", "Cost");
+            Console.WriteLine("{0,-15}{1,-10}{2,-15}{3,-15}{4,-15}{5,-10}{6,-10}", "Campground", "Site No.", "Max Occup.", "Accessible?", "Max RV Length", "Utility", "Cost");
             int i = 1;
             foreach (Site site in availableSites)
             {
